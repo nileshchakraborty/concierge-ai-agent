@@ -1,0 +1,18 @@
+GET http://127.0.0.1:8000/
+
+POST http://127.0.0.1:8000/concierge/query
+Content-Type: application/json
+
+{
+  "goal": "Find best sushi restaurants in Seattle",
+  "history": []
+}
+
+POST http://127.0.0.1:8000/agents
+Content-Type: application/json
+
+{
+  "name": "test-agent",
+  "type": "gemma",
+  "config": {}
+}

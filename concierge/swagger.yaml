@@ -1,0 +1,217 @@
+openapi: 3.0.3
+info:
+  title: Concierge Agent API
+  version: 1.0.0
+  description: "API for the Concierge agent service — runs a multi-step research workflow and optional email sending."
+servers:
+  - url: http://localhost:8000
+paths:
+  /:
+    get:
+      summary: Root health
+      responses:
+        '200':
+          description: Service status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+                  service:
+                    type: string
+                    example: concierge
+  /concierge/query:
+    post:
+      summary: Run the concierge agent flow
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConciergeRequest'
+      responses:
+        '200':
+          description: Concierge result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConciergeResponse'
+        '503':
+          description: Dependency (adapter) unavailable
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: object
+        '500':
+          description: Internal server error
+  /health/third_party:
+    get:
+      summary: Third-party adapter health check
+      responses:
+        '200':
+          description: All third-party services ok
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    example: true
+                  services:
+                    type: object
+        '503':
+          description: One or more third-party services degraded
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: object
+  /agents:
+    post:
+      summary: Create an agent
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AgentCreate'
+      responses:
+        '200':
+          description: Agent created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Agent'
+    get:
+      summary: List agents
+      responses:
+        '200':
+          description: Array of agents
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Agent'
+  /agents/{agent_id}:
+    get:
+      summary: Get an agent by id
+      parameters:
+        - in: path
+          name: agent_id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Agent object
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Agent'
+        '404':
+          description: Agent not found
+    put:
+      summary: Update an agent
+      parameters:
+        - in: path
+          name: agent_id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AgentUpdate'
+      responses:
+        '200':
+          description: Updated agent
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Agent'
+        '404':
+          description: Agent not found
+    delete:
+      summary: Delete an agent
+      parameters:
+        - in: path
+          name: agent_id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  deleted:
+                    type: boolean
+                    example: true
+        '404':
+          description: Agent not found
+components:
+  schemas:
+    ConciergeRequest:
+      type: object
+      properties:
+        goal:
+          type: string
+          example: "Find contact email and summarize options for keycard replacement services near me"
+        history:
+          type: array
+          items:
+            type: string
+      required:
+        - goal
+    ConciergeResponse:
+      type: object
+      properties:
+        result:
+          type: string
+          example: "Summary of findings and recommended next steps."
+    AgentCreate:
+      type: object
+      properties:
+        name:
+          type: string
+        type:
+          type: string
+        config:
+          type: object
+      required:
+        - name
+        - type
+    AgentUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        config:
+          type: object
+    Agent:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        type:
+          type: string
+        config:
+          type: object
+
