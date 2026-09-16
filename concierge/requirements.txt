@@ -9,4 +9,4 @@ urllib3==2.5.0
 fastapi==0.101.1
 uvicorn==0.24.0
 pydantic==2.8.0
-python-dotenv==1.0.1
+python-dotenv==1.2.2
