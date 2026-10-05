@@ -67,6 +67,13 @@ async def test_concierge_query_503_when_browse_fails(monkeypatch):
     monkeypatch.setattr(search_adapter, "search_web", fake_search)
     monkeypatch.setattr(ollama_adapter, "call_gemma", fake_call_gemma)
     monkeypatch.setattr(browse_adapter, "browse_website", fake_browse)
+    import concierge.service.di as di
+    from concierge.service.impl.ai_agent_service_impl import AiAgentServiceImpl
+
+    # Other tests may have initialized the shared adapter with a different model.
+    monkeypatch.setattr(di, "_concierge_instance", None)
+    monkeypatch.setattr(di, "_ai_agent_service", None)
+    monkeypatch.setattr(AiAgentServiceImpl, "_adapters", {})
 
     async with AsyncClient(app=app, base_url="http://test") as ac:
         resp = await ac.post(
