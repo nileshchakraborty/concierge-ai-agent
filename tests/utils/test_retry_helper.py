@@ -18,6 +18,6 @@ def test_retry_decorator_retries_and_succeeds(monkeypatch):
         return "ok"
 
     import asyncio
-    res = asyncio.get_event_loop().run_until_complete(flaky())
+    res = asyncio.run(flaky())
     assert res == "ok"
     assert calls["count"] == 3
