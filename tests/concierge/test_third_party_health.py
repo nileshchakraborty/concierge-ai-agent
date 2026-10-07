@@ -1,5 +1,5 @@
 import pytest
-from httpx import AsyncClient
+from httpx import ASGITransport, AsyncClient
 
 
 @pytest.mark.asyncio
@@ -10,7 +10,7 @@ async def test_concierge_query_503_on_search_missing(monkeypatch):
 
     monkeypatch.setattr(search_adapter, "SERPER_API_KEY", None)
 
-    async with AsyncClient(app=app, base_url="http://test") as ac:
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
         resp = await ac.post(
             "/concierge/query",
             json={"goal": "Find flights from Richmond, VA to Mumbai, IN", "history": []},
@@ -27,7 +27,7 @@ async def test_health_third_party_reports_503_when_search_down(monkeypatch):
 
     monkeypatch.setattr(search_adapter, "SERPER_API_KEY", None)
 
-    async with AsyncClient(app=app, base_url="http://test") as ac:
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
         resp = await ac.get("/health/third_party")
 
     assert resp.status_code == 503
