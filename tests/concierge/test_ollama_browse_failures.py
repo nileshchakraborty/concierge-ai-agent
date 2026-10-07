@@ -1,5 +1,5 @@
 import pytest
-from httpx import AsyncClient
+from httpx import ASGITransport, AsyncClient
 
 
 @pytest.mark.asyncio
@@ -12,7 +12,7 @@ async def test_health_third_party_ollama_failure(monkeypatch):
 
     monkeypatch.setattr(ollama_adapter, "ping", _fake_ping)
 
-    async with AsyncClient(app=app, base_url="http://test") as ac:
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
         resp = await ac.get("/health/third_party")
 
     assert resp.status_code == 503
@@ -33,7 +33,7 @@ async def test_health_third_party_browse_failure(monkeypatch):
 
     monkeypatch.setattr(browse_adapter, "ping", _fake_browse_ping)
 
-    async with AsyncClient(app=app, base_url="http://test") as ac:
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
         resp = await ac.get("/health/third_party")
 
     assert resp.status_code == 503
@@ -75,7 +75,7 @@ async def test_concierge_query_503_when_browse_fails(monkeypatch):
     monkeypatch.setattr(di, "_ai_agent_service", None)
     monkeypatch.setattr(AiAgentServiceImpl, "_adapters", {})
 
-    async with AsyncClient(app=app, base_url="http://test") as ac:
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
         resp = await ac.post(
             "/concierge/query",
             json={"goal": "Find flights from Richmond, VA to Mumbai, IN", "history": []},
