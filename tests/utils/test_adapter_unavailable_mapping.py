@@ -1,5 +1,5 @@
 import pytest
-from httpx import AsyncClient
+from httpx import ASGITransport, AsyncClient
 
 
 @pytest.mark.asyncio
@@ -14,7 +14,7 @@ async def test_adapter_unavailable_maps_to_503(monkeypatch):
 
     monkeypatch.setattr(search_adapter, "search_web", fake_search)
 
-    async with AsyncClient(app=app, base_url="http://test") as ac:
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
         resp = await ac.post(
             "/concierge/query",
             json={"goal": "Find flights from Richmond, VA to Mumbai, IN", "history": []},
